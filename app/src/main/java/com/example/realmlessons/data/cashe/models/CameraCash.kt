@@ -2,13 +2,13 @@ package com.example.realmlessons.data.cashe.models
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "camera_table"
 )
 data class CameraCash(
-
-    @androidx.room.PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @ColumnInfo("id") val id: Int,
     @ColumnInfo("name") val name: String,
     @ColumnInfo("snapshot") val snapshot: String,

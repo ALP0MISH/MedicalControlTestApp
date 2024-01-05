@@ -7,11 +7,15 @@ import com.example.realmlessons.data.common.model.Status
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.usecase.FetchAllCloud
 import com.example.realmlessons.domain.usecase.FetchSavedCameraUseCase
-import com.example.realmlessons.domain.usecase.IsCameraSaveUseCase
+import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCase
+import com.example.realmlessons.presentation.manager.CameraMarkableManager
+import com.example.realmlessons.presentation.models.CameraMark
+import com.example.realmlessons.presentation.models.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +24,13 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-const val DEFAULT_ERROR_MESSAGE = "default_error_message"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val fetchAllCloud: FetchAllCloud,
-    private val isCameraSavedUseCase: IsCameraSaveUseCase,
-    private val fetchSavedCameraUseCase: FetchSavedCameraUseCase
+    private val isCameraSavedUseCase: CameraSaveOrDeleteUseCase,
+    private val fetchSavedCameraUseCase: FetchSavedCameraUseCase,
+    private val cameraMarkableManager: CameraMarkableManager
 ) : ViewModel(
 ) {
     private val _uiStateFlow = MutableStateFlow<MainUiState>(MainUiState.Loading)
@@ -38,46 +42,53 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        fetchCameraAndDoor()
-    }
-
-    private fun fetchCameraAndDoor() {
         viewModelScope.launch(handler + Dispatchers.IO) {
-            val fetchCloudCameraResponse = async {
-                fetchAllCloud.fetchCloudCamera()
-            }
-            val fetchCloudDoorResponse = async {
-                fetchAllCloud.fetchCloudDoor()
-            }
-            val awaitedCameraResponse = fetchCloudCameraResponse.await()
-            val awaitedDoorResponse = fetchCloudDoorResponse.await()
-            if (awaitedCameraResponse.status == Status.SUCCESS && awaitedDoorResponse.status == Status.SUCCESS) {
-                _uiStateFlow.tryEmit(
-                    MainUiState.LoadedScreen(
-                        camera = awaitedCameraResponse.data ?: emptyList(),
-                        door = awaitedDoorResponse.data ?: emptyList(),
-                    )
-                )
-            } else {
-                _uiStateFlow.tryEmit(
-                    MainUiState.Error(awaitedCameraResponse.errorThrowable?.localizedMessage ?: "")
-                )
-            }
+            fetchAndUpdateUIDoors()
+            cameraMarkableManager
+                .observeCameraMarks(fetchCameras())
+                .onEach(::handleReceivedCameraMarks)
+                .launchIn(viewModelScope)
+
         }
     }
 
-    fun addOrDeleteCamera(cameraDomain: CameraDomain) {
-        viewModelScope.launch(handler + Dispatchers.IO) {
-            if (checkIsCameraSaved(cameraDomain.id)) isCameraSavedUseCase.saveCamera(cameraDomain)
-            else isCameraSavedUseCase.deleteCameraById(cameraDomain.id)
+    private suspend fun fetchCameras(): List<CameraDomain> {
+        val fetchCloudCameraResponse = coroutineScope {
+            async { fetchAllCloud.fetchCloudCamera() }
         }
+        val cameraResponse = fetchCloudCameraResponse.await()
+        return cameraResponse.data ?: emptyList()
     }
 
-    private suspend fun checkIsCameraSaved(id: Int): Boolean {
-        var isCameraSaved: Boolean = false
-        fetchSavedCameraUseCase.invoke(id).onEach { isSaved: Boolean ->
-            isCameraSaved = isSaved
-        }.launchIn(viewModelScope)
-        return isCameraSaved
+    private suspend fun fetchAndUpdateUIDoors() {
+        val fetchCloudDoorResponse = coroutineScope {
+            async { fetchAllCloud.fetchCloudDoor() }
+        }
+        val doorResponse = fetchCloudDoorResponse.await()
+        val state = if (doorResponse.status == Status.SUCCESS)
+            MainUiState.LoadedScreen(door = doorResponse.data ?: emptyList())
+        else
+            MainUiState.Error(doorResponse.errorThrowable?.localizedMessage ?: "")
+        _uiStateFlow.tryEmit(state)
     }
-}
+
+    private fun handleReceivedCameraMarks(cameraMarks: List<CameraMark>) = with(_uiStateFlow) {
+        val currentState = value as? MainUiState.LoadedScreen ?: MainUiState.LoadedScreen()
+        Log.i(
+            "abdurahman", "cameraMarks = ${cameraMarks.map { it.camera.name }}:" +
+                    " ${cameraMarks.map { it.isSaved }}"
+        )
+        tryEmit(currentState.copy(cameraMarks = cameraMarks))
+    }
+
+    fun addOrDeleteCamera(cameraMark: CameraMark) {
+        Log.i("abdurahman", "cameraMark = ${cameraMark.camera.name to  cameraMark.isSaved}")
+                    viewModelScope . launch (handler + Dispatchers.IO) {
+                if (!cameraMark.isSaved) {
+                    isCameraSavedUseCase.saveCamera(cameraMark.camera.toDomain())
+                } else {
+                    isCameraSavedUseCase.deleteCameraById(cameraMark.camera.id)
+                }
+            }
+        }
+    }

@@ -1,11 +1,12 @@
 package com.example.realmlessons.presentation.main_screen
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TweenSpec
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,11 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -39,24 +37,25 @@ import com.example.realmlessons.presentation.components.CameraList
 import com.example.realmlessons.presentation.components.DoorList
 import com.example.realmlessons.presentation.components.ErrorScreen
 import com.example.realmlessons.presentation.components.LoadingScreen
-import com.example.realmlessons.presentation.theme.ExtraMediumSpacing
-import com.example.realmlessons.presentation.theme.ExtraSpacing
+import com.example.realmlessons.presentation.models.CameraMark
+import com.example.realmlessons.presentation.theme.Gray
 import com.example.realmlessons.presentation.theme.GrayLight
 import com.example.realmlessons.presentation.theme.LightBlue
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
-    onSavaClick: (CameraDomain) -> Unit,
+    onSavaClick: (CameraMark) -> Unit,
     uiStateFlow: StateFlow<MainUiState>
 ) {
     val uiState by uiStateFlow.collectAsStateWithLifecycle()
     val fullScreenModifier = Modifier
         .fillMaxSize()
-        .background(GrayLight)
+        .background(if (isSystemInDarkTheme()) Gray else GrayLight)
     when (uiState) {
-        is MainUiState.Loading -> LoadingScreen()
+        is MainUiState.Loading -> LoadingScreen(modifier = fullScreenModifier)
         is MainUiState.Error -> {
             val errorState = uiState as MainUiState.Error
             ErrorScreen(message = errorState.message)
@@ -75,30 +74,22 @@ fun MainScreen(
     }
 }
 
+@SuppressLint("RememberReturnType")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LoadedScreen(
     cameraUiState: MainUiState.LoadedScreen,
-    onSavaClick: (CameraDomain) -> Unit,
+    onSavaClick: (CameraMark) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val homeList = listOf(
-        cameraUiState.camera,
+        cameraUiState.cameraMarks,
         cameraUiState.door
     )
 
     val pagerState = rememberPagerState { homeList.size }
     val coroutineScope = rememberCoroutineScope()
 
-    val defaultIndicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
-        Box(
-            Modifier
-                .tabIndicatorOffset(tabPositions[pagerState.currentPage])
-                .background(LightBlue)
-                .fillMaxWidth()
-                .height(2.dp)
-        )
-    }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -117,6 +108,16 @@ fun LoadedScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            val defaultIndicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
+                Box(
+                    Modifier
+                        .tabIndicatorOffset(tabPositions[pagerState.currentPage])
+                        .background(LightBlue)
+                        .fillMaxWidth()
+                        .height(2.dp)
+                )
+            }
+
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = defaultIndicator,
@@ -142,15 +143,16 @@ fun LoadedScreen(
             }
             HorizontalPager(
                 state = pagerState,
-                userScrollEnabled = false
-            ) {
-                when (pagerState.currentPage) {
+                modifier = Modifier,
+                userScrollEnabled = false,
+            ) { page ->
+                when (page) {
                     0 -> CameraList(
                         camera = cameraUiState,
                         onSavaClick = onSavaClick
                     )
 
-                    1 -> DoorList(
+                    else -> DoorList(
                         doorDomain = cameraUiState,
                     )
                 }
@@ -160,7 +162,6 @@ fun LoadedScreen(
 }
 
 @Composable
-fun getPagerHeaderByPosition(position: Int): String = when (position) {
-    0 -> "камеры"
-    else -> "двери"
-}
+fun getPagerHeaderByPosition(position: Int): String =
+    if (position == 0) "камеры" else "двери"
+

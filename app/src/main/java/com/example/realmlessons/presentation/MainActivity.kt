@@ -30,9 +30,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainScreen(
                         uiStateFlow = viewModel.uiStateFlow,
-                        onSavaClick = { id ->
-                            viewModel.addOrDeleteCamera(id)
-                        }
+                        onSavaClick = viewModel::addOrDeleteCamera
                     )
                 }
             }

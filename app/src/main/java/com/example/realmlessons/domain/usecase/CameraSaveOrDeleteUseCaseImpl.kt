@@ -4,9 +4,9 @@ import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.repository.CameraAndDoorRepository
 import javax.inject.Inject
 
-class ISCameraSavedImpl @Inject constructor(
+class CameraSaveOrDeleteUseCaseImpl @Inject constructor(
     private val repository: CameraAndDoorRepository
-) : IsCameraSaveUseCase {
+) : CameraSaveOrDeleteUseCase {
 
     override suspend fun saveCamera(camera: CameraDomain) {
         return repository.saveCamera(camera)

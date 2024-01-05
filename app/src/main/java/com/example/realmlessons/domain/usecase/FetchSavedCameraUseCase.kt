@@ -6,13 +6,13 @@ import javax.inject.Inject
 
 interface FetchSavedCameraUseCase {
 
-    suspend operator fun invoke(id: Int): Flow<Boolean>
+    suspend operator fun invoke(id: Int): Boolean
 }
 
 class FetchSavedCameraUseCaseImpl @Inject constructor(
     private val repository: CameraAndDoorRepository
 ) : FetchSavedCameraUseCase {
-    override suspend fun invoke(id: Int): Flow<Boolean> {
+    override suspend fun invoke(id: Int): Boolean {
         return repository.fetchSavedCameraById(id)
     }
 }

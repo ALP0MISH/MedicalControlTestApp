@@ -3,6 +3,7 @@ package com.example.realmlessons.presentation.main_screen
 import androidx.compose.runtime.Stable
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.models.DoorDomain
+import com.example.realmlessons.presentation.models.CameraMark
 
 sealed class MainUiState {
 
@@ -15,8 +16,8 @@ sealed class MainUiState {
 
     @Stable
     data class LoadedScreen(
-        val camera: List<CameraDomain>,
-        val door: List<DoorDomain>,
+        val cameraMarks: List<CameraMark> = emptyList(),
+        val door: List<DoorDomain> = emptyList(),
     ) : MainUiState()
 
     data class Error(

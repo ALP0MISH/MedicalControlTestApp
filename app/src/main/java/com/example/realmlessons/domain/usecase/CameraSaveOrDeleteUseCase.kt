@@ -2,7 +2,7 @@ package com.example.realmlessons.domain.usecase
 
 import com.example.realmlessons.domain.models.CameraDomain
 
-interface IsCameraSaveUseCase {
+interface CameraSaveOrDeleteUseCase {
 
     suspend fun saveCamera(camera: CameraDomain)
 

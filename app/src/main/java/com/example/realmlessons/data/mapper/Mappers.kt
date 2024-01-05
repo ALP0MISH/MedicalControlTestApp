@@ -6,7 +6,7 @@ import com.example.realmlessons.data.cloud.models.door.DoorCloud
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.models.DoorDomain
 
-fun CameraDomain.toDomain(): CameraCash = this.run {
+fun CameraDomain.toCameraCash(): CameraCash = this.run {
     CameraCash(
         id = id,
         name = name,
@@ -18,6 +18,17 @@ fun CameraDomain.toDomain(): CameraCash = this.run {
 }
 
 fun CameraCloud.toDomain(): CameraDomain = this.run {
+    CameraDomain(
+        id = id,
+        name = name,
+        snapshot = snapshot,
+        favorites = favorites,
+        rec = rec,
+        room = room,
+    )
+}
+
+fun CameraCash.toDomain(): CameraDomain = this.run {
     CameraDomain(
         id = id,
         name = name,

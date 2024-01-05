@@ -28,8 +28,12 @@ import androidx.compose.material.swipeable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -47,25 +51,26 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.realmlessons.R
-import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.presentation.main_screen.MainUiState
+import com.example.realmlessons.presentation.models.Camera
+import com.example.realmlessons.presentation.models.CameraMark
 import com.example.realmlessons.presentation.theme.ExtraLargeSpacing
 import com.example.realmlessons.presentation.theme.ExtraMediumSpacing
 import com.example.realmlessons.presentation.theme.LargeSpacing
 import com.example.realmlessons.presentation.theme.MediumSpacing
-import com.example.realmlessons.presentation.theme.SmallElevation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 
 @Composable
 fun CameraList(
     camera: MainUiState.LoadedScreen,
-    onSavaClick: (CameraDomain) -> Unit,
+    onSavaClick: (CameraMark) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(21.dp),
     ) {
         item {
@@ -79,15 +84,12 @@ fun CameraList(
             )
         }
         items(
-            items = camera.camera,
-            key = { it.id },
-        ) { camera ->
+            items = camera.cameraMarks,
+            key = { it.camera.id },
+        ) { cameraMark ->
             CameraItem(
-                cameraImageUrl = camera.snapshot,
-                cameraTitle = camera.name,
-                favorite = camera.favorites,
+                cameraMark = cameraMark,
                 onSavaClick = onSavaClick,
-                cameraId = camera.id
             )
         }
     }
@@ -96,17 +98,14 @@ fun CameraList(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CameraItem(
-    favorite: Boolean,
-    cameraId: Int,
-    onSavaClick: (CameraDomain) -> Unit,
-    cameraTitle: String,
-    cameraImageUrl: String,
+    cameraMark: CameraMark,
+    onSavaClick: (CameraMark) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val swipableState = rememberSwipeableState(initialValue = 0)
     val isSwiped by rememberUpdatedState(swipableState.currentValue.toFloat() != 0f)
-
+    val camera = cameraMark.camera
     val listener = object : ImageRequest.Listener {
         override fun onError(request: ImageRequest, result: ErrorResult) {
             super.onError(request, result)
@@ -117,15 +116,21 @@ fun CameraItem(
         }
     }
 
-    val imageRequest = ImageRequest.Builder(context)
-        .data(cameraImageUrl)
-        .listener(listener)
-        .dispatcher(Dispatchers.IO)
-        .memoryCacheKey(cameraImageUrl)
-        .diskCacheKey(cameraImageUrl)
-        .diskCachePolicy(CachePolicy.ENABLED)
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .build()
+    var isPressed by remember { mutableStateOf(false) }
+    var isHidden by remember { mutableStateOf(false) }
+
+
+    val imageRequest = ImageRequest.Builder(context).data(camera.snapshot).listener(listener)
+        .dispatcher(Dispatchers.IO).memoryCacheKey(camera.snapshot).diskCacheKey(camera.snapshot)
+        .diskCachePolicy(CachePolicy.ENABLED).memoryCachePolicy(CachePolicy.ENABLED).build()
+
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            delay(2000)
+            isPressed = false
+            isHidden = false
+        }
+    }
 
     Box(
         modifier = modifier
@@ -135,15 +140,12 @@ fun CameraItem(
             .height(280.dp)
             .clip(RoundedCornerShape(ExtraMediumSpacing))
             .swipeable(
-                state = swipableState,
-                anchors = mapOf(
+                state = swipableState, anchors = mapOf(
                     0f to 0,
                     -dpToPx(dp = 50f, context = context) to 1,
-                ),
-                thresholds = { _, _ ->
+                ), thresholds = { _, _ ->
                     FractionalThreshold(0.3f)
-                },
-                orientation = Orientation.Horizontal
+                }, orientation = Orientation.Horizontal
             )
     ) {
         Box(modifier = Modifier
@@ -169,16 +171,6 @@ fun CameraItem(
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
-            if (favorite) {
-                Image(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .align(Alignment.TopEnd)
-                        .padding(ExtraMediumSpacing),
-                    painter = painterResource(id = R.drawable.stars),
-                    contentDescription = null
-                )
-            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -190,7 +182,7 @@ fun CameraItem(
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     modifier = Modifier.padding(start = LargeSpacing),
-                    text = cameraTitle,
+                    text = camera.name,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -204,27 +196,25 @@ fun CameraItem(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .size(36.dp)
-                .alpha(if (isSwiped) 1f else 0f)
+                .alpha(if (isSwiped) 1f else 0.5f)
                 .padding(end = MediumSpacing)
+                .padding(bottom = ExtraMediumSpacing)
+
         ) {
-            Image(
+            Box(
                 modifier = Modifier
-                    .size(25.dp)
+                    .size(36.dp)
                     .clickable {
-                        onSavaClick(
-                            CameraDomain(
-                                id = cameraId,
-                                name = cameraTitle,
-                                snapshot = cameraImageUrl,
-                                room = String(),
-                                favorites = false,
-                                rec = false,
-                            )
-                        )
-                    },
-                painter = painterResource(id = R.drawable.star),
-                contentDescription = null
-            )
+                        onSavaClick(cameraMark)
+                    }
+            ) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = if (cameraMark.isSaved) painterResource(id = R.drawable.star)
+                    else painterResource(id = R.drawable.stars),
+                    contentDescription = null,
+                )
+            }
         }
     }
 }
@@ -235,11 +225,13 @@ fun CameraItem(
 fun CameraItemPreview() {
     MaterialTheme {
         CameraItem(
-            cameraTitle = stringResource(id = R.string.my_house),
-            cameraImageUrl = "https://w.forfun.com/fetch/b4/b4061f05d1365648decb0cac791373a3.jpeg",
-            favorite = true,
+            cameraMark = CameraMark.unknown.copy(
+                camera = Camera.unknown.copy(
+                    snapshot = "https://w.forfun.com/fetch/b4/b4061f05d1365648decb0cac791373a3.jpeg",
+                    name = stringResource(id = R.string.my_house)
+                )
+            ),
             onSavaClick = {},
-            cameraId = 0
         )
     }
 }

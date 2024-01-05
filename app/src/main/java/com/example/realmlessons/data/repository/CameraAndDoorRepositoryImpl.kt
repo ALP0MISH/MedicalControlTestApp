@@ -4,10 +4,12 @@ import com.example.realmlessons.data.common.model.ResultModel
 import com.example.realmlessons.data.cashe.source.CommonDataSource
 import com.example.realmlessons.data.cloud.source.CameraAndDoorCloudDataSource
 import com.example.realmlessons.data.mapper.toDomain
+import com.example.realmlessons.data.mapper.toCameraCash
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.models.DoorDomain
 import com.example.realmlessons.domain.repository.CameraAndDoorRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CameraAndDoorRepositoryImpl @Inject constructor(
@@ -15,7 +17,7 @@ class CameraAndDoorRepositoryImpl @Inject constructor(
     private val cloudDataSource: CameraAndDoorCloudDataSource
 ) : CameraAndDoorRepository {
 
-    override suspend fun fetchSavedCameraById(id: Int): Flow<Boolean> {
+    override suspend fun fetchSavedCameraById(id: Int): Boolean {
         return commonDataSource.fetchSavedCameraById(id)
     }
 
@@ -36,9 +38,14 @@ class CameraAndDoorRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun observeAllSavedCamera(): Flow<List<CameraDomain>> {
+        return commonDataSource.observeAllSavedCamera().map { cameras ->
+            cameras.map { it.toDomain() }
+        }
+    }
 
     override suspend fun saveCamera(saveCamera: CameraDomain) {
-        commonDataSource.fetchCamera(saveCamera.toDomain())
+        commonDataSource.saveCamera(saveCamera.toCameraCash())
     }
 
     override suspend fun deleteCameraById(id: Int) {

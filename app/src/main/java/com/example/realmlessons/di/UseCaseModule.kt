@@ -4,9 +4,8 @@ import com.example.realmlessons.domain.usecase.FetchAllCloud
 import com.example.realmlessons.domain.usecase.FetchAllCloudImpl
 import com.example.realmlessons.domain.usecase.FetchSavedCameraUseCase
 import com.example.realmlessons.domain.usecase.FetchSavedCameraUseCaseImpl
-import com.example.realmlessons.domain.usecase.ISCameraSavedImpl
-import com.example.realmlessons.domain.usecase.IsCameraSaveUseCase
-import com.example.realmlessons.domain.usecase.IsCameraSaveUseCaseImpl
+import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCase
+import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,9 +16,9 @@ import dagger.hilt.components.SingletonComponent
 interface UseCaseModule {
 
     @Binds
-    fun bindsFetchAllSaver(
-        implementation: ISCameraSavedImpl
-    ): IsCameraSaveUseCase
+    fun bindsCameraSaveOrDeleteUseCase(
+        implementation: CameraSaveOrDeleteUseCaseImpl
+    ): CameraSaveOrDeleteUseCase
 
     @Binds
     fun bindsFetchAllCloud(

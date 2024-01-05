@@ -1,14 +1,15 @@
 package com.example.realmlessons.data.cashe.source
 
 import com.example.realmlessons.data.cashe.models.CameraCash
-import com.example.realmlessons.data.cloud.models.camera.CameraCloud
-import com.example.realmlessons.domain.models.CameraDomain
+import kotlinx.coroutines.flow.Flow
 
 interface CommonDataSource {
 
-    suspend fun fetchCamera(saveDoor: CameraCash)
+    fun observeAllSavedCamera(): Flow<List<CameraCash>>
+
+    suspend fun saveCamera(saveDoor: CameraCash)
 
     suspend fun deleteCameraById(id: Int)
 
-    suspend fun fetchSavedCameraById(id: Int): kotlinx.coroutines.flow.Flow<Boolean>
+    suspend fun fetchSavedCameraById(id: Int): Boolean
 }

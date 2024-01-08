@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.realmlessons.data.common.model.Status
 import com.example.realmlessons.domain.models.CameraDomain
-import com.example.realmlessons.domain.usecase.FetchAllCloud
-import com.example.realmlessons.domain.usecase.FetchSavedCameraUseCase
 import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCase
+import com.example.realmlessons.domain.usecase.FetchAllCloud
 import com.example.realmlessons.presentation.manager.CameraMarkableManager
 import com.example.realmlessons.presentation.models.CameraMark
 import com.example.realmlessons.presentation.models.toDomain
@@ -22,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -29,26 +29,23 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val fetchAllCloud: FetchAllCloud,
     private val isCameraSavedUseCase: CameraSaveOrDeleteUseCase,
-    private val fetchSavedCameraUseCase: FetchSavedCameraUseCase,
-    private val cameraMarkableManager: CameraMarkableManager
+    private val cameraMarkableManager: CameraMarkableManager,
 ) : ViewModel(
 ) {
     private val _uiStateFlow = MutableStateFlow<MainUiState>(MainUiState.Loading)
     val uiStateFlow: StateFlow<MainUiState> = _uiStateFlow.asStateFlow()
-
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         _uiStateFlow.tryEmit(MainUiState.Error(throwable.localizedMessage ?: ""))
     }
 
     init {
-        viewModelScope.launch(handler + Dispatchers.IO) {
+        viewModelScope.launch {
             fetchAndUpdateUIDoors()
-            cameraMarkableManager
-                .observeCameraMarks(fetchCameras())
+
+            cameraMarkableManager.observeCameraMarks(fetchCameras())
                 .onEach(::handleReceivedCameraMarks)
                 .launchIn(viewModelScope)
-
         }
     }
 
@@ -65,30 +62,43 @@ class MainViewModel @Inject constructor(
             async { fetchAllCloud.fetchCloudDoor() }
         }
         val doorResponse = fetchCloudDoorResponse.await()
-        val state = if (doorResponse.status == Status.SUCCESS)
-            MainUiState.LoadedScreen(door = doorResponse.data ?: emptyList())
-        else
-            MainUiState.Error(doorResponse.errorThrowable?.localizedMessage ?: "")
+        val state = if (doorResponse.status == Status.SUCCESS) MainUiState.LoadedScreen(
+            door = doorResponse.data ?: emptyList()
+        )
+        else MainUiState.Error(doorResponse.errorThrowable?.localizedMessage ?: "")
         _uiStateFlow.tryEmit(state)
     }
 
     private fun handleReceivedCameraMarks(cameraMarks: List<CameraMark>) = with(_uiStateFlow) {
         val currentState = value as? MainUiState.LoadedScreen ?: MainUiState.LoadedScreen()
-        Log.i(
-            "abdurahman", "cameraMarks = ${cameraMarks.map { it.camera.name }}:" +
-                    " ${cameraMarks.map { it.isSaved }}"
-        )
         tryEmit(currentState.copy(cameraMarks = cameraMarks))
     }
 
     fun addOrDeleteCamera(cameraMark: CameraMark) {
-        Log.i("abdurahman", "cameraMark = ${cameraMark.camera.name to  cameraMark.isSaved}")
-                    viewModelScope . launch (handler + Dispatchers.IO) {
-                if (!cameraMark.isSaved) {
-                    isCameraSavedUseCase.saveCamera(cameraMark.camera.toDomain())
-                } else {
-                    isCameraSavedUseCase.deleteCameraById(cameraMark.camera.id)
+        viewModelScope.launch(handler + Dispatchers.IO) {
+            if (!cameraMark.isSaved) {
+                isCameraSavedUseCase.saveCamera(cameraMark.camera.toDomain())
+                withContext(Dispatchers.Main) {
+                    handleCameraSavedStateChange(cameraMark.camera.id, isSaved = true)
+                }
+            } else {
+                isCameraSavedUseCase.deleteCameraById(cameraMark.camera.id)
+                withContext(Dispatchers.Main) {
+                    handleCameraSavedStateChange(cameraMark.camera.id, isSaved = false)
                 }
             }
         }
     }
+
+    private fun handleCameraSavedStateChange(cameraId: Int, isSaved: Boolean) {
+        val currentState = _uiStateFlow.value as? MainUiState.LoadedScreen ?: MainUiState.LoadedScreen()
+        val updatedCameraMarks = currentState.cameraMarks.map { cameraMark ->
+            if (cameraMark.camera.id == cameraId) {
+                cameraMark.copy(isSaved = isSaved)
+            } else {
+                cameraMark
+            }
+        }
+        _uiStateFlow.tryEmit(currentState.copy(cameraMarks = updatedCameraMarks))
+    }
+}

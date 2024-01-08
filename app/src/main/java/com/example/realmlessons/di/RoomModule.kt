@@ -2,7 +2,7 @@ package com.example.realmlessons.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.realmlessons.data.cashe.dao.CommonDao
+import com.example.realmlessons.data.cashe.dao.CameraDao
 import com.example.realmlessons.data.cashe.database.DataBase
 import dagger.Module
 import dagger.Provides
@@ -24,5 +24,5 @@ class RoomModule {
     @Provides
     fun provideMovieDao(
         dataBase: DataBase
-    ): CommonDao = dataBase.commonDao()
+    ): CameraDao = dataBase.cameraDoa()
 }

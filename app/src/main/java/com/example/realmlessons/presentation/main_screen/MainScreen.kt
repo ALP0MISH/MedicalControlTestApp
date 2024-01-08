@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,16 +22,14 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.realmlessons.R
-import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.presentation.components.CameraList
 import com.example.realmlessons.presentation.components.DoorList
 import com.example.realmlessons.presentation.components.ErrorScreen
@@ -41,25 +38,24 @@ import com.example.realmlessons.presentation.models.CameraMark
 import com.example.realmlessons.presentation.theme.Gray
 import com.example.realmlessons.presentation.theme.GrayLight
 import com.example.realmlessons.presentation.theme.LightBlue
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
     onSavaClick: (CameraMark) -> Unit,
-    uiStateFlow: StateFlow<MainUiState>
+    uiStateFlow: State<MainUiState>
 ) {
-    val uiState by uiStateFlow.collectAsStateWithLifecycle()
+    val uiState by uiStateFlow
     val fullScreenModifier = Modifier
         .fillMaxSize()
         .background(if (isSystemInDarkTheme()) Gray else GrayLight)
     when (uiState) {
-        is MainUiState.Loading -> LoadingScreen(modifier = fullScreenModifier)
         is MainUiState.Error -> {
-            val errorState = uiState as MainUiState.Error
-            ErrorScreen(message = errorState.message)
+            val error = uiState as MainUiState.Error
+            ErrorScreen(message = error.message)
         }
+
+        is MainUiState.Loading -> LoadingScreen(modifier = fullScreenModifier)
 
         is MainUiState.LoadedScreen -> {
             val loadedState = uiState as MainUiState.LoadedScreen
@@ -135,7 +131,7 @@ fun LoadedScreen(
                             Text(
                                 text = header,
                                 style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = MaterialTheme.colorScheme.onBackground,
                             )
                         },
                     )
@@ -149,7 +145,7 @@ fun LoadedScreen(
                 when (page) {
                     0 -> CameraList(
                         camera = cameraUiState,
-                        onSavaClick = onSavaClick
+                        onSavaClick = onSavaClick,
                     )
 
                     else -> DoorList(

@@ -1,6 +1,5 @@
 package com.example.realmlessons.presentation.models
 
-import com.example.realmlessons.domain.models.CameraDomain
 import javax.annotation.concurrent.Immutable
 
 @Immutable

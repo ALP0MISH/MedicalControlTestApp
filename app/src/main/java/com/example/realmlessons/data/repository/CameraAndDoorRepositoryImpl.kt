@@ -17,7 +17,7 @@ class CameraAndDoorRepositoryImpl @Inject constructor(
     private val cloudDataSource: CameraAndDoorCloudDataSource
 ) : CameraAndDoorRepository {
 
-    override suspend fun fetchSavedCameraById(id: Int): Boolean {
+    override fun fetchSavedCameraById(id: Int): Flow<Boolean> {
         return commonDataSource.fetchSavedCameraById(id)
     }
 
@@ -38,10 +38,8 @@ class CameraAndDoorRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun observeAllSavedCamera(): Flow<List<CameraDomain>> {
-        return commonDataSource.observeAllSavedCamera().map { cameras ->
-            cameras.map { it.toDomain() }
-        }
+    override fun observeAllSavedCamera(): Flow<List<Int>> {
+        return commonDataSource.observeAllSavedCamera()
     }
 
     override suspend fun saveCamera(saveCamera: CameraDomain) {

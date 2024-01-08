@@ -1,5 +1,7 @@
 package com.example.realmlessons.presentation.components
 
+import android.annotation.SuppressLint
+import android.net.http.HttpException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +18,11 @@ import androidx.compose.ui.res.stringResource
 import com.example.realmlessons.R
 import com.example.realmlessons.presentation.theme.LargeSpacing
 
+@SuppressLint("NewApi")
 @Composable
 fun ErrorScreen(
     message: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier

@@ -1,20 +1,17 @@
 package com.example.realmlessons.data.cashe.source
 
 import android.util.Log
-import com.example.realmlessons.data.cashe.dao.CommonDao
+import com.example.realmlessons.data.cashe.dao.CameraDao
 import com.example.realmlessons.data.cashe.models.CameraCash
-import com.example.realmlessons.domain.models.CameraDomain
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 class CommonDataSourceImpl @Inject constructor(
-    private val commonDao: CommonDao
+    private val commonDao: CameraDao
 ) : CommonDataSource {
 
-    override fun observeAllSavedCamera(): Flow<List<CameraCash>> {
+    override fun observeAllSavedCamera(): Flow<List<Int>> {
         return commonDao.observeAllSavedCamera().onEach {
             Log.i("PPP", "camers: $it")
         }
@@ -25,7 +22,7 @@ class CommonDataSourceImpl @Inject constructor(
         return commonDao.saveCamera(saveDoor)
     }
 
-    override suspend fun fetchSavedCameraById(id: Int): Boolean {
+    override fun fetchSavedCameraById(id: Int): Flow<Boolean> {
         return commonDao.fetchSavedCameraById(id)
     }
 

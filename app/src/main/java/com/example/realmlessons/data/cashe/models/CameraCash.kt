@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "camera_table"
+    tableName = "camera"
 )
 data class CameraCash(
     @PrimaryKey

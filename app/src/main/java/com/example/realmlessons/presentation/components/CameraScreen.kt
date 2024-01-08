@@ -1,5 +1,6 @@
 package com.example.realmlessons.presentation.components
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -80,13 +81,14 @@ fun CameraList(
                     .padding(),
                 text = stringResource(id = R.string.living_room),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
         }
         items(
             items = camera.cameraMarks,
             key = { it.camera.id },
         ) { cameraMark ->
+            Log.i("LLL", "${cameraMark.isSaved}")
             CameraItem(
                 cameraMark = cameraMark,
                 onSavaClick = onSavaClick,
@@ -106,37 +108,17 @@ fun CameraItem(
     val swipableState = rememberSwipeableState(initialValue = 0)
     val isSwiped by rememberUpdatedState(swipableState.currentValue.toFloat() != 0f)
     val camera = cameraMark.camera
-    val listener = object : ImageRequest.Listener {
-        override fun onError(request: ImageRequest, result: ErrorResult) {
-            super.onError(request, result)
-        }
-
-        override fun onSuccess(request: ImageRequest, result: SuccessResult) {
-            super.onSuccess(request, result)
-        }
-    }
-
-    var isPressed by remember { mutableStateOf(false) }
-    var isHidden by remember { mutableStateOf(false) }
-
+    val listener = object : ImageRequest.Listener {}
 
     val imageRequest = ImageRequest.Builder(context).data(camera.snapshot).listener(listener)
         .dispatcher(Dispatchers.IO).memoryCacheKey(camera.snapshot).diskCacheKey(camera.snapshot)
         .diskCachePolicy(CachePolicy.ENABLED).memoryCachePolicy(CachePolicy.ENABLED).build()
 
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
-            delay(2000)
-            isPressed = false
-            isHidden = false
-        }
-    }
-
     Box(
         modifier = modifier
+            .fillMaxWidth()
             .padding(bottom = MediumSpacing)
             .padding(top = MediumSpacing)
-            .fillMaxWidth()
             .height(280.dp)
             .clip(RoundedCornerShape(ExtraMediumSpacing))
             .swipeable(
@@ -148,11 +130,12 @@ fun CameraItem(
                 }, orientation = Orientation.Horizontal
             )
     ) {
-        Box(modifier = Modifier
-            .offset {
-                IntOffset(swipableState.offset.value.roundToInt(), 0)
-            }
-            .fillMaxWidth()
+        Box(
+            modifier = Modifier
+                .offset {
+                    IntOffset(swipableState.offset.value.roundToInt(), 0)
+                }
+                .fillMaxWidth()
         ) {
             AsyncImage(
                 modifier = Modifier
@@ -199,19 +182,18 @@ fun CameraItem(
                 .alpha(if (isSwiped) 1f else 0.5f)
                 .padding(end = MediumSpacing)
                 .padding(bottom = ExtraMediumSpacing)
-
         ) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
                     .clickable {
                         onSavaClick(cameraMark)
-                    }
+                    },
             ) {
                 Image(
                     modifier = Modifier.fillMaxSize(),
-                    painter = if (cameraMark.isSaved) painterResource(id = R.drawable.star)
-                    else painterResource(id = R.drawable.stars),
+                    painter = if (cameraMark.isSaved) painterResource(id = R.drawable.stars)
+                    else painterResource(id = R.drawable.star),
                     contentDescription = null,
                 )
             }

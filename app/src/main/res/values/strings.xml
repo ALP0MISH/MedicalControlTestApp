@@ -2,5 +2,6 @@
     <string name="app_name">RealmLessons</string>
     <string name="my_house">Мой дом</string>
     <string name="refresh">Refresh</string>
+    <string name="error_connection_description">Отсутствует подключение к Интернету.</string>
     <string name="living_room">Гостиная</string>
 </resources>

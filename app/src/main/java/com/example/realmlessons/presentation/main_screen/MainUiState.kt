@@ -9,11 +9,6 @@ sealed class MainUiState {
 
     data object Loading : MainUiState()
 
-    data class Loaded(
-        val isSaved: Boolean,
-        val saveCamera: CameraDomain,
-    ) : MainUiState()
-
     @Stable
     data class LoadedScreen(
         val cameraMarks: List<CameraMark> = emptyList(),

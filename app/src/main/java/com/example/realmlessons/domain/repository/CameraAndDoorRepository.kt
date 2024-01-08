@@ -7,13 +7,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface CameraAndDoorRepository {
 
-    fun observeAllSavedCamera(): Flow<List<CameraDomain>>
+    fun observeAllSavedCamera(): Flow<List<Int>>
 
     suspend fun saveCamera(saveCamera: CameraDomain)
 
     suspend fun deleteCameraById(id: Int)
 
-    suspend fun fetchSavedCameraById(id: Int): Boolean
+    fun fetchSavedCameraById(id: Int): Flow<Boolean>
 
     suspend fun fetchCloudDoor(): ResultModel<List<DoorDomain>>
 

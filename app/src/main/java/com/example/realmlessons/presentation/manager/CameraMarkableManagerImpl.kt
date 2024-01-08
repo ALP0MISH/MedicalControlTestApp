@@ -14,7 +14,6 @@ class CameraMarkableManagerImpl @Inject constructor(
 ) : CameraMarkableManager {
     override fun observeCameraMarks(cameras: List<CameraDomain>): Flow<List<CameraMark>> {
         return repository.observeAllSavedCamera().map { savedCameras ->
-            Log.i("Joseph", "savedCameras = ${savedCameras.map { it.name }}")
             
             cameras.map { cameraDomain ->
                 CameraMark(
@@ -26,7 +25,7 @@ class CameraMarkableManagerImpl @Inject constructor(
                         room = cameraDomain.room ?: String(),
                         snapshot = cameraDomain.snapshot,
                     ),
-                    isSaved = savedCameras.map { it.id }.contains(cameraDomain.id)
+                    isSaved = savedCameras.contains(cameraDomain.id)
                 )
             }
         }

@@ -5,11 +5,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface CommonDataSource {
 
-    fun observeAllSavedCamera(): Flow<List<CameraCash>>
+    fun observeAllSavedCamera(): Flow<List<Int>>
 
     suspend fun saveCamera(saveDoor: CameraCash)
 
     suspend fun deleteCameraById(id: Int)
 
-    suspend fun fetchSavedCameraById(id: Int): Boolean
+    fun fetchSavedCameraById(id: Int): Flow<Boolean>
 }

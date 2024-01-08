@@ -1,7 +1,6 @@
 package com.example.realmlessons.data.cashe.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -9,17 +8,17 @@ import com.example.realmlessons.data.cashe.models.CameraCash
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface CommonDao {
+interface CameraDao {
 
-    @Query("SELECT * FROM camera_table")
-    fun observeAllSavedCamera(): Flow<List<CameraCash>>
+    @Query("SELECT id FROM camera")
+    fun observeAllSavedCamera(): Flow<List<Int>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveCamera(doorCash: CameraCash)
 
-    @Query("SELECT EXISTS(SELECT 1 FROM camera_table WHERE id = :id)")
-    suspend fun fetchSavedCameraById(id: Int): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM camera WHERE id = :id)")
+    fun fetchSavedCameraById(id: Int): Flow<Boolean>
 
-    @Query("DELETE FROM camera_table WHERE id = :id")
+    @Query("DELETE FROM camera WHERE id = :id")
     suspend fun deleteCameraById(id: Int)
 }

@@ -2,7 +2,6 @@ package com.example.realmlessons.presentation
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.realmlessons.domain.models.CameraDomain
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.realmlessons.presentation.main_screen.MainScreen
 import com.example.realmlessons.presentation.main_screen.MainViewModel
 import com.example.realmlessons.presentation.theme.RealmLessonsTheme
@@ -29,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     MainScreen(
-                        uiStateFlow = viewModel.uiStateFlow,
+                        uiStateFlow = viewModel.uiStateFlow.collectAsStateWithLifecycle(),
                         onSavaClick = viewModel::addOrDeleteCamera
                     )
                 }

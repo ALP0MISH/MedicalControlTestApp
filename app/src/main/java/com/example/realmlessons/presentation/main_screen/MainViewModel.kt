@@ -78,14 +78,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch(handler + Dispatchers.IO) {
             if (!cameraMark.isSaved) {
                 isCameraSavedUseCase.saveCamera(cameraMark.camera.toDomain())
-                withContext(Dispatchers.Main) {
                     handleCameraSavedStateChange(cameraMark.camera.id, isSaved = true)
-                }
             } else {
                 isCameraSavedUseCase.deleteCameraById(cameraMark.camera.id)
-                withContext(Dispatchers.Main) {
                     handleCameraSavedStateChange(cameraMark.camera.id, isSaved = false)
-                }
             }
         }
     }

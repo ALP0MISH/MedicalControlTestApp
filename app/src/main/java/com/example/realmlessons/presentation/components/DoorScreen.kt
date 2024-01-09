@@ -85,7 +85,7 @@ fun DoorItem(
             .swipeable(
                 state = swipableState, anchors = mapOf(
                     0f to 0,
-                    -dpToPx(dp = 30f, context = context) to 1,
+                    -dpToPx(dp = 1f, context = context) to 1,
                 ), thresholds = { _, _ ->
                     FractionalThreshold(0.3f)
                 }, orientation = Orientation.Horizontal
@@ -94,7 +94,8 @@ fun DoorItem(
             .background(MaterialTheme.colorScheme.background)
             .padding(MediumSpacing), verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier
+        Box(
+            modifier = Modifier
             .offset {
                 IntOffset(swipableState.offset.value.roundToInt(), 0)
             }

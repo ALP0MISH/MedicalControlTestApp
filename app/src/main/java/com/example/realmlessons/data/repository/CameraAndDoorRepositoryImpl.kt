@@ -1,19 +1,18 @@
 package com.example.realmlessons.data.repository
 
 import com.example.realmlessons.data.common.model.ResultModel
-import com.example.realmlessons.data.cashe.source.CommonDataSource
+import com.example.realmlessons.data.cashe.source.CameraDataSource
 import com.example.realmlessons.data.cloud.source.CameraAndDoorCloudDataSource
-import com.example.realmlessons.data.mapper.toDomain
-import com.example.realmlessons.data.mapper.toCameraCash
+import com.example.realmlessons.data.common.mapper.toDomain
+import com.example.realmlessons.data.common.mapper.toCameraCash
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.models.DoorDomain
 import com.example.realmlessons.domain.repository.CameraAndDoorRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CameraAndDoorRepositoryImpl @Inject constructor(
-    private val commonDataSource: CommonDataSource,
+    private val commonDataSource: CameraDataSource,
     private val cloudDataSource: CameraAndDoorCloudDataSource
 ) : CameraAndDoorRepository {
 

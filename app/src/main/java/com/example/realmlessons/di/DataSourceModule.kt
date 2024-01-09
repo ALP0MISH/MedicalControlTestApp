@@ -1,7 +1,7 @@
 package com.example.realmlessons.di
 
-import com.example.realmlessons.data.cashe.source.CommonDataSource
-import com.example.realmlessons.data.cashe.source.CommonDataSourceImpl
+import com.example.realmlessons.data.cashe.source.CameraDataSource
+import com.example.realmlessons.data.cashe.source.CameraDataSourceImpl
 import com.example.realmlessons.data.cloud.source.CameraAndDoorCloudDataSource
 import com.example.realmlessons.data.cloud.source.CameraAndDoorCloudDataSourceImpl
 import dagger.Binds
@@ -15,8 +15,8 @@ interface DataSourceModule {
 
     @Binds
     fun bindsCommonDataSource(
-        implementation: CommonDataSourceImpl
-    ): CommonDataSource
+        implementation: CameraDataSourceImpl
+    ): CameraDataSource
 
     @Binds
     fun bindsCameraAndDoorDataSource(

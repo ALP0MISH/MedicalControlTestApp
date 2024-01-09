@@ -1,4 +1,4 @@
-package com.example.realmlessons.data.mapper
+package com.example.realmlessons.data.common.mapper
 
 import com.example.realmlessons.data.cashe.models.CameraCash
 import com.example.realmlessons.data.cloud.models.camera.CameraCloud

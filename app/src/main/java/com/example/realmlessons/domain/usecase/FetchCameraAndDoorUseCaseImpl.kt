@@ -6,9 +6,9 @@ import com.example.realmlessons.domain.models.DoorDomain
 import com.example.realmlessons.domain.repository.CameraAndDoorRepository
 import javax.inject.Inject
 
-class FetchAllCloudImpl @Inject constructor(
+class FetchCameraAndDoorUseCaseImpl @Inject constructor(
     private val repository: CameraAndDoorRepository
-) : FetchAllCloud {
+) : FetchCameraAndDoorUseCase {
 
     override suspend fun fetchCloudDoor(): ResultModel<List<DoorDomain>> {
         return repository.fetchCloudDoor()

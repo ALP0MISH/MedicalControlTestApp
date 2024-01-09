@@ -1,12 +1,11 @@
 package com.example.realmlessons.presentation.main_screen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.realmlessons.data.common.model.Status
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCase
-import com.example.realmlessons.domain.usecase.FetchAllCloud
+import com.example.realmlessons.domain.usecase.FetchCameraAndDoorUseCase
 import com.example.realmlessons.presentation.manager.CameraMarkableManager
 import com.example.realmlessons.presentation.models.CameraMark
 import com.example.realmlessons.presentation.models.toDomain
@@ -21,17 +20,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val fetchAllCloud: FetchAllCloud,
+    private val fetchCameraAndDoorUseCase: FetchCameraAndDoorUseCase,
     private val isCameraSavedUseCase: CameraSaveOrDeleteUseCase,
     private val cameraMarkableManager: CameraMarkableManager,
 ) : ViewModel(
 ) {
+
     private val _uiStateFlow = MutableStateFlow<MainUiState>(MainUiState.Loading)
     val uiStateFlow: StateFlow<MainUiState> = _uiStateFlow.asStateFlow()
 
@@ -51,7 +50,7 @@ class MainViewModel @Inject constructor(
 
     private suspend fun fetchCameras(): List<CameraDomain> {
         val fetchCloudCameraResponse = coroutineScope {
-            async { fetchAllCloud.fetchCloudCamera() }
+            async { fetchCameraAndDoorUseCase.fetchCloudCamera() }
         }
         val cameraResponse = fetchCloudCameraResponse.await()
         return cameraResponse.data ?: emptyList()
@@ -59,7 +58,7 @@ class MainViewModel @Inject constructor(
 
     private suspend fun fetchAndUpdateUIDoors() {
         val fetchCloudDoorResponse = coroutineScope {
-            async { fetchAllCloud.fetchCloudDoor() }
+            async { fetchCameraAndDoorUseCase.fetchCloudDoor() }
         }
         val doorResponse = fetchCloudDoorResponse.await()
         val state = if (doorResponse.status == Status.SUCCESS) MainUiState.LoadedScreen(

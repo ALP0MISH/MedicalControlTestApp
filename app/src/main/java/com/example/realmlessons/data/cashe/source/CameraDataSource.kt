@@ -3,7 +3,7 @@ package com.example.realmlessons.data.cashe.source
 import com.example.realmlessons.data.cashe.models.CameraCash
 import kotlinx.coroutines.flow.Flow
 
-interface CommonDataSource {
+interface CameraDataSource {
 
     fun observeAllSavedCamera(): Flow<List<Int>>
 

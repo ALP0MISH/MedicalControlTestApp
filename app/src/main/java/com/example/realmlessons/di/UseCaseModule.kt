@@ -1,11 +1,9 @@
 package com.example.realmlessons.di
 
-import com.example.realmlessons.domain.usecase.FetchAllCloud
-import com.example.realmlessons.domain.usecase.FetchAllCloudImpl
-import com.example.realmlessons.domain.usecase.FetchSavedCameraUseCase
-import com.example.realmlessons.domain.usecase.FetchSavedCameraUseCaseImpl
 import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCase
 import com.example.realmlessons.domain.usecase.CameraSaveOrDeleteUseCaseImpl
+import com.example.realmlessons.domain.usecase.FetchCameraAndDoorUseCase
+import com.example.realmlessons.domain.usecase.FetchCameraAndDoorUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,12 +20,6 @@ interface UseCaseModule {
 
     @Binds
     fun bindsFetchAllCloud(
-        implementation: FetchAllCloudImpl
-    ): FetchAllCloud
-
-    @Binds
-    fun bindsFetchSavedCameraUseCaseImpl(
-        implementation: FetchSavedCameraUseCaseImpl
-    ): FetchSavedCameraUseCase
-
+        implementation: FetchCameraAndDoorUseCaseImpl
+    ): FetchCameraAndDoorUseCase
 }

@@ -4,7 +4,7 @@ import com.example.realmlessons.data.common.model.ResultModel
 import com.example.realmlessons.domain.models.CameraDomain
 import com.example.realmlessons.domain.models.DoorDomain
 
-interface FetchAllCloud {
+interface FetchCameraAndDoorUseCase {
 
     suspend fun fetchCloudDoor(): ResultModel<List<DoorDomain>>
 

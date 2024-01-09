@@ -18,7 +18,6 @@ class CameraAndDoorCloudDataSourceImpl @Inject constructor(
         invokeRequest { service.fetchDoor() }
     }
 
-
     override suspend fun fetchCloudCamera(
     ): ResultModel<CameraResponseResult> = withContext(Dispatchers.IO) {
         invokeRequest {

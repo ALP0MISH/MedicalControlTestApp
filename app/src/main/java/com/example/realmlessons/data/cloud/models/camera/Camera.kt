@@ -31,3 +31,6 @@ data class CamerasCloud(
     @SerializedName(CAMERAS)
     val cameras: List<CameraCloud>
 )
+
+data class CameraResponseResult(val data: CamerasCloud)
+

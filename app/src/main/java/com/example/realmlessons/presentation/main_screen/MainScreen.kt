@@ -65,8 +65,6 @@ fun MainScreen(
                 onSavaClick = onSavaClick
             )
         }
-
-        else -> {}
     }
 }
 
@@ -113,7 +111,6 @@ fun LoadedScreen(
                         .height(2.dp)
                 )
             }
-
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = defaultIndicator,
